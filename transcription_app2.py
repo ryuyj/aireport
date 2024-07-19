@@ -8,7 +8,7 @@ client = OpenAI(
     api_key=os.environ.get("API_KEY") 
 )
 
-file_path = "d:/openai_project/src/speech/data/test4.mp3"
+file_path = "./memo1.m4a"
 audio_file= open(file_path, "rb")
 
 transcription = client.audio.transcriptions.create(

@@ -3,6 +3,9 @@ from dotenv import load_dotenv
 from docx import Document
 import os
 
+
+load_dotenv()
+
 class AudioNotesGenerator:
     def __init__(self):
         self.client = OpenAI(api_key=os.environ.get("API_KEY"))
@@ -13,19 +16,27 @@ class AudioNotesGenerator:
                 model="whisper-1",
                 file=audio_file
                 ) # Whisper 모델로 트랜스크립션 요청
-        return transcription.text # 트랜스크립션 결과 반환
+        return self.remove_str(transcription.text) # 트랜스크립션 결과 반환
 
     def audio_notes(self, transcription):
-        abstract_summary = self.abstract_summary_extraction(transcription)
-        key_points = self.key_points_extraction(transcription) # 주요 요점 추출
-        action_items = self.action_item_extraction(transcription) # 작업 항목 추출
-        sentiment = self.sentiment_analysis(transcription) # 감정 분석
+        abstract_summary = self.abstract_summary_extraction(self.remove_str(transcription))
+        key_points = self.key_points_extraction(self.remove_str(transcription)) # 주요 요점 추출
+        action_items = self.action_item_extraction(self.remove_str(transcription)) # 작업 항목 추출
+        sentiment = self.sentiment_analysis(self.remove_str(transcription)) # 감정 분석
         return { 
             'abstract_summary': abstract_summary, # 요약 반환
             'key_points': key_points, # 주요 요점 반환
             'action_items': action_items, # 작업 항목 반환
             'sentiment': sentiment # 감정 분석 반환
         }
+    
+    def remove_str(self, s):
+        # 문자열의 길이를 구합니다.
+        length = len(s)
+        # 마지막 10%의 길이를 계산합니다.
+        cut_length = length // 50
+        # 문자열에서 마지막 10%를 자릅니다.
+        return s[:-cut_length]
 
     def abstract_summary_extraction(self, transcription):
         response = self.client.chat.completions.create(
@@ -117,9 +128,10 @@ class AudioNotesGenerator:
 if __name__ == "__main__":
 
     # 오디오 파일 경로 설정
-    audio_file_path = "./data/Earningscall.wav"
+    #file_path = "memo1.m4a"
+    audio_file_path = "test.m4a"
     # 출력 파일 이름 설정
-    output_filename = "./data/notes.docx"
+    output_filename = "notes.docx"
     # AudioNotesGenerator 인스턴스 생성
     generator = AudioNotesGenerator()
     # 메모 생성 및 저장
